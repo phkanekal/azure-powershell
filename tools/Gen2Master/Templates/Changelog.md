@@ -20,5 +20,5 @@
 ## Upcoming Release
 
 ## Version 0.1.0
-* First preview release for module Az.ModuleNamePlaceHolder
+* First preview release for module Az.{ModuleNamePlaceHolder}
 

@@ -99,7 +99,10 @@ Function Copy-Template {
             New-Item -Path $DestPath
             $TemplatePath = Join-Path -Path (Join-Path -Path $PSScriptRoot -ChildPath "Templates") -ChildPath $SourceName
             $TemplateContent = Get-Content -Path $TemplatePath
-            $TemplateContent -replace 'ModuleNamePlaceHolder',$ModuleName | Set-Content -Path $DestPath
+            If ($TemplateContent -Match "{GUID}") {
+                $TemplateContent = $TemplateContent -replace '{GUID}',(New-Guid).Guid
+            }
+            $TemplateContent -replace '{ModuleNamePlaceHolder}',$ModuleName | Set-Content -Path $DestPath
         }
     }
 }
