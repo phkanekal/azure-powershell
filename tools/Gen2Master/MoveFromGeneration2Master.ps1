@@ -51,6 +51,31 @@ Function Move-Generation2Master {
             Copy-Item -Path $SourceItem -Destination $DestPath
         }
 
+        #Region verify psd1 file
+        $Psd1Metadata = Import-LocalizedData -BaseDirectory $DestPath -FileName "Az.$ModuleName.psd1"
+        If ($Psd1Metadata.FunctionsToExport -Contains "*") {
+            $Psd1Metadata.FunctionsToExport = ($Psd1Metadata.FunctionsToExport | Where-Object {$_ -ne "*"})
+            Update-ModuleManifest -Path (Join-Path -Path $DestPath -ChildPath "Az.$ModuleName.psd1") @Psd1Metadata
+        }
+        #EndRegion
+
+        #Region Remove unnecessary readme.md
+        $ReadmeInHelp = Join-Path -Path (Join-Path -Path $SourcePath -ChildPath 'help') -ChildPath 'readme.md'
+        $ModuleReadmeInHelp = Join-Path -Path (Join-Path -Path $SourcePath -ChildPath 'help') -ChildPath 'Az.$ModuleName.md'
+        If (Test-Path $ReadmeInHelp) {
+            Write-Host "Moving file from $ReadmeInHelp to $ModuleReadmeInHelp"
+            Move-Item -Path $ReadmeInHelp -Destination $ModuleReadmeInHelp
+        }
+        $ReadmeInExample = Join-Path -Path (Join-Path -Path $SourcePath -ChildPath 'examples') -ChildPath 'readme.md'
+        If (Test-Path $ReadmeInExample) {
+            Remove-Item -Path $ReadmeInExample
+        }
+        #EndRegion
+
+        #Region update azure-powershell-modules.md
+        
+        #EndRegion
+
         Copy-Template -SourceName Az.ModuleName.csproj -DestPath $DestPath -DestName "Az.$ModuleName.csproj"
         Copy-Template -SourceName Changelog.md -DestPath $DestPath -DestName Changelog.md
         Copy-Template -SourceName ModuleName.sln -DestPath $DestPath -DestName "$ModuleName.sln"
